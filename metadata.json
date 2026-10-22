@@ -1,0 +1,6 @@
+{
+  "name": "Bridge",
+  "description": "Minimalist high-speed local file sharing application between Android devices and browsers over Wi-Fi or Hotspot.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

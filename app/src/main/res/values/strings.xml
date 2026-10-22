@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">Bridge</string>
+    <string name="tagline">Direct local file sharing</string>
+    <string name="default_web_client_id">888642487586-pm6kilalu06kb0ll8e81lc7bi0tlnk4t.apps.googleusercontent.com</string>
+    <string name="nav_share">Share</string>
+    <string name="nav_receive">Receive</string>
+    <string name="nav_transfers">Transfers</string>
+    <string name="nav_browser">Browser</string>
+    <string name="nav_settings">Settings</string>
+    <string name="start_sharing">Start Sharing</string>
+    <string name="stop_sharing">Stop Sharing</string>
+    <string name="select_files">Select Files</string>
+    <string name="add_files">Add Files</string>
+    <string name="no_files_selected">No files selected for sharing</string>
+    <string name="ready_to_share">Select files to generate a share link and QR code</string>
+    <string name="server_running">Sharing server active</string>
+    <string name="server_stopped">Server stopped</string>
+    <string name="connected_devices">Connected Devices</string>
+    <string name="copy_link">Copy Link</string>
+    <string name="share_link">Share Link</string>
+    <string name="scan_qr_desc">Scan with another phone or open the URL in any browser</string>
+    <string name="wifi_network_label">Network</string>
+    <string name="active_transfers">Active Transfers</string>
+    <string name="completed_transfers">Completed</string>
+    <string name="clear_history">Clear History</string>
+    <string name="storage_location">Received files saved to Downloads/Bridge</string>
+</resources>

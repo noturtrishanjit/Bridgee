@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bridge — Local Direct Transfer</title>
+  <style>
+    :root {
+      --bg: #F1F5F9;
+      --surface-glass: rgba(255, 255, 255, 0.75);
+      --surface-elevated: rgba(255, 255, 255, 0.88);
+      --surface-border: rgba(255, 255, 255, 0.80);
+      --surface-inner-glow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.95);
+      --text: #0F172A;
+      --text-muted: #64748B;
+      --accent: #2563EB;
+      --accent-surface: rgba(37, 99, 235, 0.08);
+      --accent-border: rgba(37, 99, 235, 0.25);
+      --success: #059669;
+      --success-surface: rgba(5, 150, 105, 0.10);
+      --danger: #DC2626;
+      --card-bg: rgba(255, 255, 255, 0.65);
+      --radius: 18px;
+      --radius-sm: 12px;
+      --shadow-glass: 0 12px 32px 0 rgba(15, 23, 42, 0.06), 0 1px 2px 0 rgba(15, 23, 42, 0.04);
+      --transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0B0F17;
+        --surface-glass: rgba(17, 24, 39, 0.75);
+        --surface-elevated: rgba(31, 41, 55, 0.85);
+        --surface-border: rgba(255, 255, 255, 0.14);
+        --surface-inner-glow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.16);
+        --text: #F8FAFC;
+        --text-muted: #94A3B8;
+        --accent: #38BDF8;
+        --accent-surface: rgba(56, 189, 248, 0.12);
+        --accent-border: rgba(56, 189, 248, 0.28);
+        --success: #10B981;
+        --success-surface: rgba(16, 185, 129, 0.14);
+        --danger: #EF4444;
+        --card-bg: rgba(31, 41, 55, 0.60);
+        --shadow-glass: 0 16px 36px 0 rgba(0, 0, 0, 0.45), 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+      }
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 28px 16px;
+      -webkit-font-smoothing: antialiased;
+    }
+    .container {
+      width: 100%;
+      max-width: 780px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* Pure Liquid Glass Panel */
+    .glass-panel {
+      background: var(--surface-glass);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: 1px solid var(--surface-border);
+      box-shadow: var(--shadow-glass), var(--surface-inner-glow);
+      border-radius: var(--radius);
+      padding: 22px;
+      transition: var(--transition);
+    }
+
+    /* Clean Header */
+    header.glass-panel {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 22px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: var(--accent);
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 800;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.28);
+    }
+    .brand-titles h1 {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: var(--text);
+    }
+    .brand-titles p {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+    .badges {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--surface-elevated);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--surface-border);
+      box-shadow: var(--surface-inner-glow);
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .pill-accent {
+      background: var(--accent-surface);
+      color: var(--accent);
+      border-color: var(--accent-border);
+    }
+    .pill-success {
+      background: var(--success-surface);
+      color: var(--success);
+      border-color: rgba(5, 150, 105, 0.25);
+    }
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--success);
+      border-radius: 50%;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 8px;
+      background: var(--surface-glass);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: 1px solid var(--surface-border);
+      box-shadow: var(--shadow-glass), var(--surface-inner-glow);
+      padding: 6px;
+      border-radius: var(--radius);
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 10px 16px;
+      background: transparent;
+      border: none;
+      border-radius: 12px;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: var(--transition);
+    }
+    .tab-btn:hover {
+      color: var(--text);
+    }
+    .tab-btn.active {
+      background: var(--surface-elevated);
+      color: var(--text);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05), var(--surface-inner-glow);
+    }
+
+    /* Section Headings */
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+    }
+    .section-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Liquid Glass Drop Zone */
+    .glass-dropzone {
+      border: 1.5px dashed var(--accent);
+      border-radius: var(--radius);
+      padding: 38px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+      background: var(--accent-surface);
+    }
+    .glass-dropzone:hover, .glass-dropzone.dragover {
+      background: rgba(37, 99, 235, 0.14);
+      transform: translateY(-1px);
+    }
+    .drop-icon {
+      width: 44px;
+      height: 44px;
+      margin: 0 auto 10px;
+      color: var(--accent);
+    }
+    .drop-main {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .drop-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    /* File List & Items */
+    .file-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .file-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--surface-border);
+      box-shadow: var(--surface-inner-glow);
+      border-radius: var(--radius-sm);
+      transition: var(--transition);
+    }
+    .file-card:hover {
+      background: var(--surface-elevated);
+      border-color: var(--accent-border);
+      transform: translateY(-1px);
+    }
+    .file-leading {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      overflow: hidden;
+      min-width: 0;
+    }
+    .file-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: var(--accent-surface);
+      border: 1px solid var(--accent-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+    .file-meta {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+    }
+    .file-name {
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--text);
+    }
+    .file-details {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 9px 16px;
+      background: var(--accent);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      transition: var(--transition);
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+    }
+    .btn:hover {
+      opacity: 0.92;
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: var(--surface-elevated);
+      color: var(--text);
+      border: 1px solid var(--surface-border);
+      box-shadow: var(--surface-inner-glow);
+    }
+    .btn-secondary:hover {
+      background: var(--surface-glass);
+      border-color: var(--accent-border);
+    }
+
+    /* Upload Progress Box */
+    .upload-progress-box {
+      margin-top: 10px;
+      width: 100%;
+    }
+    .progress-track {
+      height: 6px;
+      background: rgba(148, 163, 184, 0.22);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      border-radius: 3px;
+      transition: width 0.15s ease-out;
+    }
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-top: 5px;
+    }
+
+    /* Empty State */
+    .empty-card {
+      text-align: center;
+      padding: 38px 16px;
+      color: var(--text-muted);
+    }
+    .empty-icon {
+      width: 44px;
+      height: 44px;
+      margin: 0 auto 12px;
+      color: var(--text-muted);
+      opacity: 0.6;
+    }
+
+    /* Glass Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 12px 20px;
+      background: var(--surface-elevated);
+      color: var(--text);
+      border: 1px solid var(--surface-border);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12), var(--surface-inner-glow);
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: var(--transition);
+      pointer-events: none;
+      z-index: 100;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Liquid Glass Header -->
+    <header class="glass-panel">
+      <div class="brand">
+        <div class="brand-icon">⚡</div>
+        <div class="brand-titles">
+          <h1>Bridge</h1>
+          <p>Local Direct File Transfer</p>
+        </div>
+      </div>
+      <div class="badges">
+        <div class="pill pill-accent" id="host-identity-badge" style="display:none;">
+          <span id="host-avatar-icon">🦅</span>
+          <span id="host-device-name">Host Device</span>
+        </div>
+        <div class="pill">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span>AES-256</span>
+        </div>
+        <div class="pill pill-success">
+          <div class="live-dot"></div>
+          <span id="connection-status">Live</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Liquid Glass Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" id="tab-download-btn" onclick="switchTab('download')">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Download Files (<span id="download-count">0</span>)
+      </button>
+      <button class="tab-btn" id="tab-upload-btn" onclick="switchTab('upload')">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        Upload to Phone
+      </button>
+    </div>
+
+    <!-- Download Section -->
+    <div class="glass-panel" id="section-download">
+      <div class="section-head">
+        <div>
+          <div class="section-title">Files Shared by Host</div>
+          <div class="section-subtitle" id="host-file-summary">Direct local streaming</div>
+        </div>
+        <button class="btn btn-secondary" onclick="fetchFiles()" title="Refresh file list">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+          </svg>
+          Refresh
+        </button>
+      </div>
+
+      <div class="file-stack" id="file-list">
+        <div class="empty-card">
+          <div class="empty-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/>
+            </svg>
+          </div>
+          <div style="font-weight:600; font-size:14px; color:var(--text);">No files shared yet</div>
+          <div style="font-size:13px; margin-top:4px;">When the host selects files in the app, they will appear here instantly.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upload Section -->
+    <div class="glass-panel" id="section-upload" style="display:none;">
+      <div class="section-head">
+        <div>
+          <div class="section-title">Upload to Android Device</div>
+          <div class="section-subtitle">Transferred directly to the device's Downloads/Bridge folder</div>
+        </div>
+      </div>
+
+      <div class="glass-dropzone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+        <input type="file" id="file-input" style="display:none;" multiple onchange="handleFileSelect(this.files)">
+        <div class="drop-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+        </div>
+        <div class="drop-main">Click or drag photos and files here</div>
+        <div class="drop-sub">Direct local transfer • Zero compression • Automatically saved in app</div>
+      </div>
+
+      <div style="margin-top:20px;">
+        <div style="font-size:14px; font-weight:700; margin-bottom:12px;" id="upload-queue-title">Upload Queue</div>
+        <div class="file-stack" id="upload-queue"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">File uploaded successfully</div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionToken = urlParams.get('token') || '';
+    let currentTab = 'download';
+
+    function switchTab(tab) {
+      currentTab = tab;
+      const downloadBtn = document.getElementById('tab-download-btn');
+      const uploadBtn = document.getElementById('tab-upload-btn');
+      const downloadSec = document.getElementById('section-download');
+      const uploadSec = document.getElementById('section-upload');
+
+      if (tab === 'download') {
+        downloadBtn.classList.add('active');
+        uploadBtn.classList.remove('active');
+        downloadSec.style.display = 'block';
+        uploadSec.style.display = 'none';
+        fetchFiles();
+      } else {
+        uploadBtn.classList.add('active');
+        downloadBtn.classList.remove('active');
+        uploadSec.style.display = 'block';
+        downloadSec.style.display = 'none';
+      }
+    }
+
+    function formatBytes(bytes, decimals = 1) {
+      if (!bytes || bytes <= 0) return '0 B';
+      const k = 1024;
+      const dm = decimals < 0 ? 0 : decimals;
+      const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function getFileIconSvg(mime) {
+      if (mime && mime.startsWith('image/')) {
+        return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
+      }
+      if (mime && mime.startsWith('video/')) {
+        return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>`;
+      }
+      return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>`;
+    }
+
+    async function fetchFiles() {
+      try {
+        const res = await fetch('/api/files?token=' + encodeURIComponent(sessionToken));
+        if (!res.ok) return;
+        const files = await res.json();
+        renderFileList(files);
+      } catch (e) {
+        console.error('Error fetching files:', e);
+      }
+    }
+
+    function renderFileList(files) {
+      const listEl = document.getElementById('file-list');
+      const countEl = document.getElementById('download-count');
+      const summaryEl = document.getElementById('host-file-summary');
+
+      countEl.innerText = files.length;
+      if (files.length === 0) {
+        summaryEl.innerText = 'No files available';
+        listEl.innerHTML = `
+          <div class="empty-card">
+            <div class="empty-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/>
+              </svg>
+            </div>
+            <div style="font-weight:600; font-size:14px; color:var(--text);">No files shared yet</div>
+            <div style="font-size:13px; margin-top:4px;">When the host selects files in the app, they will appear here instantly.</div>
+          </div>
+        `;
+        return;
+      }
+
+      summaryEl.innerText = `${files.length} file${files.length > 1 ? 's' : ''} ready for direct local download`;
+      listEl.innerHTML = files.map(file => `
+        <div class="file-card">
+          <div class="file-leading">
+            <div class="file-avatar">
+              ${getFileIconSvg(file.mimeType)}
+            </div>
+            <div class="file-meta">
+              <div class="file-name" title="${file.name}">${file.name}</div>
+              <div class="file-details">${formatBytes(file.size)} • ${file.mimeType || 'file'}</div>
+            </div>
+          </div>
+          <a href="/api/download/${file.id}?token=${encodeURIComponent(sessionToken)}&raw=1"
+             download="${file.name}"
+             class="btn"
+             style="flex-shrink:0;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Download
+          </a>
+        </div>
+      `).join('');
+    }
+
+    // Drag and drop handling
+    const dropZone = document.getElementById('drop-zone');
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.add('dragover');
+      }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.remove('dragover');
+      }, false);
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      handleFileSelect(files);
+    }, false);
+
+    function handleFileSelect(files) {
+      if (!files || files.length === 0) return;
+      for (let i = 0; i < files.length; i++) {
+        uploadFile(files[i]);
+      }
+    }
+
+    function uploadFile(file) {
+      const uploadQueue = document.getElementById('upload-queue');
+      const uploadId = 'up_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+
+      const itemEl = document.createElement('div');
+      itemEl.className = 'file-card';
+      itemEl.style.flexDirection = 'column';
+      itemEl.style.alignItems = 'stretch';
+      itemEl.id = uploadId;
+
+      itemEl.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div class="file-leading">
+            <div class="file-avatar">
+              ${getFileIconSvg(file.type)}
+            </div>
+            <div class="file-meta">
+              <div class="file-name">${file.name}</div>
+              <div class="file-details">${formatBytes(file.size)}</div>
+            </div>
+          </div>
+          <span style="font-size:12px; font-weight:700; color:var(--accent);" class="upload-status">Uploading...</span>
+        </div>
+        <div class="upload-progress-box">
+          <div class="progress-track">
+            <div class="progress-fill"></div>
+          </div>
+          <div class="progress-labels">
+            <span class="speed-text">0 KB/s</span>
+            <span class="pct-text">0%</span>
+          </div>
+        </div>
+      `;
+
+      uploadQueue.prepend(itemEl);
+
+      const xhr = new XMLHttpRequest();
+      const startTime = Date.now();
+
+      xhr.upload.onprogress = function(e) {
+        if (e.lengthComputable) {
+          const pct = Math.round((e.loaded / e.total) * 100);
+          itemEl.querySelector('.progress-fill').style.width = pct + '%';
+          itemEl.querySelector('.pct-text').innerText = pct + '% (' + formatBytes(e.loaded) + ' / ' + formatBytes(e.total) + ')';
+
+          const elapsedSec = (Date.now() - startTime) / 1000;
+          if (elapsedSec > 0.4) {
+            const speed = (e.loaded / elapsedSec);
+            itemEl.querySelector('.speed-text').innerText = formatBytes(speed) + '/s';
+          }
+        }
+      };
+
+      xhr.onload = function() {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          const statusLabel = itemEl.querySelector('.upload-status');
+          statusLabel.innerText = '✓ Saved on Phone';
+          statusLabel.style.color = 'var(--success)';
+          itemEl.querySelector('.progress-fill').style.width = '100%';
+          itemEl.querySelector('.progress-fill').style.background = 'var(--success)';
+          showToast(`Uploaded: ${file.name}`);
+          fetchFiles();
+        } else {
+          const statusLabel = itemEl.querySelector('.upload-status');
+          statusLabel.innerText = '✗ Error ' + xhr.status;
+          statusLabel.style.color = 'var(--danger)';
+        }
+      };
+
+      xhr.onerror = function() {
+        const statusLabel = itemEl.querySelector('.upload-status');
+        statusLabel.innerText = '✗ Network Failed';
+        statusLabel.style.color = 'var(--danger)';
+      };
+
+      xhr.open('POST', '/api/upload?token=' + encodeURIComponent(sessionToken) + '&filename=' + encodeURIComponent(file.name));
+      xhr.setRequestHeader('X-Filename', encodeURIComponent(file.name));
+      xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
+      xhr.send(file);
+    }
+
+    function setupEventStream() {
+      if (!window.EventSource) return;
+      try {
+        const es = new EventSource('/api/events?token=' + encodeURIComponent(sessionToken));
+        es.onmessage = function(e) {
+          try {
+            const event = JSON.parse(e.data);
+            if (event.type === 'files_updated') {
+              fetchFiles();
+            } else if (event.type === 'peer_joined') {
+              showToast('Device connected');
+            }
+          } catch(err) {}
+        };
+      } catch(e) {}
+    }
+
+    const AVATAR_MAP = {
+      cyber_falcon: '🦅',
+      quantum_fox: '🦊',
+      cosmic_owl: '🦉',
+      hyper_shield: '🛡️',
+      retro_robot: '🤖',
+      neon_tiger: '🐅',
+      zen_pilot: '⚡',
+      pixel_hero: '👾'
+    };
+
+    async function fetchSession() {
+      try {
+        const res = await fetch('/api/session?token=' + encodeURIComponent(sessionToken));
+        if (res.ok) {
+          const data = await res.json();
+          if (data.deviceName) {
+            document.getElementById('host-identity-badge').style.display = 'inline-flex';
+            document.getElementById('host-device-name').innerText = data.deviceName;
+            document.getElementById('host-avatar-icon').innerText = AVATAR_MAP[data.avatarId] || '🦅';
+          }
+        }
+      } catch(e) {}
+    }
+
+    fetchSession();
+    fetchFiles();
+    setupEventStream();
+  </script>
+</body>
+</html>
